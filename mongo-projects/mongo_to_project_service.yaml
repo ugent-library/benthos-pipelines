@@ -1,0 +1,108 @@
+# Common config fields, showing default values
+input:
+  label: ""
+  mongodb:
+    url: mongodb://localhost:27017 # No default (required)
+    # url: mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000
+    database: "authority" # No default (required)
+    collection: "project_update" # No default (required)
+    operation: aggregate
+    query: | 
+      root = [
+          {
+            "$sort": {
+              "date_created": 1
+            }
+          }
+        ]
+
+pipeline:
+  processors:
+    - branch:
+        request_map: 'root = this.soap_message'
+        processors:
+          - cerif: {}
+        result_map: 'root.cerif = this'
+    - switch:
+        - check: this.cerif.action == "DELETE"
+          processors:
+              - mapping: |
+                  root.action = this.cerif.action
+                  root.id = this.cerif.id
+                  root.created = this.date_created
+                  root.modified = this.date_updated
+        - processors:
+            - mapping: |
+                root.action = this.cerif.action
+                root.id = this.cerif.id
+
+                root.created = this.date_created
+                root.modified = this.date_updated
+                root.action = this.cerif.action
+
+                root.type = "researchProject"
+
+                root.foundingDate = this.cerif.start_date
+                root.dissolutionDate = this.cerif.end_date
+                
+                root.name = if this.cerif.exists("title") {
+                   this.cerif.title.apply("translate")
+                }
+                
+                root.description = if this.cerif.exists("abstract") {
+                   this.cerif.abstract.apply("translate")
+                }
+
+                root.identifier = this.cerif.federated_ids.apply("identifiers")
+
+                root.hasAcronym = this.cerif.acronym.not_null().catch(deleted())
+
+                # root.cerif = this.cerif
+
+                map identifiers {
+                  let cf = this.filter(cf -> cf.uri == "/be.ugent/gismo/project/federated-id/")
+                  root = if $cf.length() > 0 { $cf.index(0).ids }
+                  root = if root.length() > 0 { root.map_each(t -> {
+                      "type": "PropertyValue",
+                      "value": t.id,
+                      "propertyID": t.uri
+                  }) }
+                }
+
+                map translate {
+                  let v = this.filter(t -> t.translation == "o")
+                  root = $v.map_each(d -> { 
+                    "language": d.lang,
+                    "value": d.value
+                  })
+                }
+
+output:
+  switch:
+    cases:
+      - check: this.action == "UPDATE"
+        output:
+          http_client:
+            retries: 0
+            url: "http://localhost:3000/api/v1/add-project"
+            verb: POST
+            headers:
+              Content-Type: application/json
+              X-API-Key: xyz
+      - check: this.action == "DELETE"
+        output:
+          drop_on:
+            error: true
+            output:
+              http_client:
+                retries: 0
+                drop_on: [404]
+                url: "http://localhost:3000/api/v1/delete-project"
+                verb: POST
+                headers:
+                  Content-Type: application/json
+                  X-API-Key: xyz
+      - output:
+          label: ""
+          stdout:
+            codec: lines
