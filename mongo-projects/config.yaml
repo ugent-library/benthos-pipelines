@@ -1,11 +1,9 @@
-# Common config fields, showing default values
 input:
   label: ""
   mongodb:
-    url: mongodb://localhost:27017 # No default (required)
-    # url: mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000
-    database: "authority" # No default (required)
-    collection: "project_update" # No default (required)
+    url: ${MONGODB_URL}
+    database: ${MONGODB_DB}
+    collection: ${MONGODB_COLLECTION}
     operation: aggregate
     query: | 
       root = [
@@ -17,6 +15,7 @@ input:
         ]
 
 pipeline:
+  threads: 1
   processors:
     - branch:
         request_map: 'root = this.soap_message'
@@ -83,25 +82,19 @@ output:
       - check: this.action == "UPDATE"
         output:
           http_client:
-            retries: 0
-            url: "http://localhost:3000/api/v1/add-project"
+            url: ${PROJECTS_API_ADD_PROJECT}
             verb: POST
             headers:
               Content-Type: application/json
-              X-API-Key: xyz
+              X-API-Key: ${PROJECTS_API_KEY}
       - check: this.action == "DELETE"
         output:
-          drop_on:
-            error: true
-            output:
-              http_client:
-                retries: 0
-                drop_on: [404]
-                url: "http://localhost:3000/api/v1/delete-project"
-                verb: POST
-                headers:
-                  Content-Type: application/json
-                  X-API-Key: xyz
+          http_client:
+            url: ${PROJECTS_API_DELETE_PROJECT}
+            verb: POST
+            headers:
+              Content-Type: application/json
+              X-API-Key: ${PROJECTS_API_KEY}
       - output:
           label: ""
           stdout:
