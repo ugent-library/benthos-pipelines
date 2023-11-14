@@ -33,7 +33,6 @@ pipeline:
         - processors:
             - mapping: |
                 root.action = this.cerif.action
-                root.id = this.cerif.id
 
                 root.created = this.date_created
                 root.modified = this.date_updated
@@ -53,6 +52,11 @@ pipeline:
                 }
 
                 root.identifier = this.cerif.federated_ids.apply("identifiers")
+                root.identifier = root.identifier.append({
+                  "type": "PropertyValue",
+                  "value": this.cerif.id,
+                  "propertyID": "gismo_id"
+                })
 
                 root.hasAcronym = this.cerif.acronym.not_null().catch(deleted())
 
