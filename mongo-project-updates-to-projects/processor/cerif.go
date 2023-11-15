@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/benthosdev/benthos/v4/public/service"
-	"github.com/ugent-library/projects/benthos/cerif"
+	"github.com/ugent-library/benthos-pipelines/mongo-project-updates-to-projects/cerif"
 )
 
 func init() {

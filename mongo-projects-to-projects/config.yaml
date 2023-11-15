@@ -1,0 +1,89 @@
+input:
+  label: ""
+  mongodb:
+    url: ${MONGODB_URL}
+    database: ${MONGODB_DB}
+    collection: ${MONGODB_COLLECTION}
+    query: |
+      {}
+
+pipeline:
+  threads: 1
+  processors:
+    - mapping: |
+        root.type = "researchProject"
+
+        root.id = "urn:iweto:" + this._id
+
+        root.name = []
+        root.name = if this.exists("title") {
+          root.name.append({
+            "language": "und",
+            "value": this.title
+          })
+        }
+
+        root.description = []
+        root.description = if this.exists("abstract") {
+          root.description.append({
+            "language": "und",
+            "value": this.abstract
+          })
+        }
+
+        root.foundingDate = this.start_date.not_empty().catch(deleted())
+        root.dissolutionDate = this.end_date.not_empty().catch(deleted())
+
+        root.identifier = []
+
+        root.identifier = if this.exists("iweto_id") {
+          root.identifier.append({
+            "type": "PropertyValue",
+            "propertyID": "IWETO",
+            "value": this.iweto_id
+          })
+        }
+
+        root.identifier = if this.exists("gismo_id") {
+          root.identifier.append({
+            "type": "PropertyValue",
+            "propertyID": "GISMO",
+            "value": this.gismo_id
+          })
+        }
+
+        root.identifier = if this.exists("eu_id") {
+          root.identifier.append({
+            "type": "PropertyValue",
+            "propertyID": "CORDIS",
+            "value": this.eu_id
+          })
+        }
+
+        root.hasAcronym = []
+        root.hasAcronym = if this.exists("eu_acronym") {
+            root.hasAcronym.append(this.eu_acronym)
+        }
+  
+        root.isFundedBy = if this.exists("eu_id") {
+            {
+               "type": "grant",
+               "hasCallNumber": if this.exists("eu_call_id") {
+                  this.eu_call_id
+               },
+               "isAwardedBy": if this.exists("eu_framework_programme") {
+                 {
+                  "type": "fundingProgramme",
+                  "name": this.eu_framework_programme
+                 }
+               }
+            }
+        }
+
+output:
+  http_client:
+    url: ${PROJECTS_API_ADD_PROJECT}
+    verb: POST
+    headers:
+      Content-Type: application/json
+      X-API-Key: ${PROJECTS_API_KEY}

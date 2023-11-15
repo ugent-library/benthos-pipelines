@@ -1,4 +1,4 @@
-module github.com/ugent-library/projects/benthos
+module github.com/ugent-library/benthos-pipelines/mongo-project-updates-to-projects
 
 go 1.21.1
 

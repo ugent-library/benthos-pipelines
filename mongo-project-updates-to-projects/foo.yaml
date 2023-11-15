@@ -1,0 +1,22 @@
+# Common config fields, showing default values
+input:
+  label: ""
+  mongodb:
+    url: mongodb://localhost:27017 # No default (required)
+    database: "authority" # No default (required)
+    collection: "project" # No default (required)
+    operation: aggregate
+    query: | 
+      root = [
+          {
+            "$sort": {
+              "date_created": 1
+            }
+          }
+        ]
+
+pipeline:
+  processors:
+    - mapping: |
+       root.gismo_id = this.gismo_id
+       root.iweto_id = this.iweto_id
