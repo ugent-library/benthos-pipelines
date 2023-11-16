@@ -1,6 +1,6 @@
 FROM jeffail/benthos:4.21
 
-COPY config.yaml .
+COPY /mongo-projects-to-projects/config.yaml .
 
 ENTRYPOINT ["/benthos"]
 
