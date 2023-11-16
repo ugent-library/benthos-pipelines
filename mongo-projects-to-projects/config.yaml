@@ -42,6 +42,12 @@ pipeline:
             "propertyID": "IWETO",
             "value": this.iweto_id
           })
+        } else {
+          root.identifier.append({
+            "type": "PropertyValue",
+            "propertyID": "IWETO",
+            "value": this._id
+          })
         }
 
         root.identifier = if this.exists("gismo_id") {
