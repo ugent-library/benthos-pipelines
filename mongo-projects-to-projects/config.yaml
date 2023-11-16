@@ -66,6 +66,21 @@ pipeline:
           })
         }
 
+        let ugentID = if this.exists("ugent_id") {
+          if this.ugent_id.length() > 0 { this.ugent_id.map_each(t -> {
+                "type": "PropertyValue",
+                "value": t,
+                "propertyID": "UGENT"
+            })
+          } else {
+            []
+          }
+        } else {
+          []
+        }
+
+        root.identifier = root.identifier.merge($ugentID)
+
         root.hasAcronym = []
         root.hasAcronym = if this.exists("eu_acronym") {
             root.hasAcronym.append(this.eu_acronym)
