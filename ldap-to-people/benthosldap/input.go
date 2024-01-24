@@ -133,12 +133,12 @@ func (l *ldapInput) Read(ctx context.Context) (*service.Message, service.AckFunc
 	}
 
 	entry := l.res.Entry()
-	vals := make(map[string][]string, len(entry.Attributes))
+	attrs := make(map[string][]string, len(entry.Attributes))
 	for _, a := range entry.Attributes {
-		vals[a.Name] = a.Values
+		attrs[a.Name] = a.Values
 	}
 
-	data, err := json.Marshal(vals)
+	data, err := json.Marshal(attrs)
 	if err != nil {
 		return nil, nil, err
 	}
