@@ -2,10 +2,9 @@ module github.com/ugent-library/benthos-pipelines/ldap-to-people
 
 go 1.21.6
 
-require (
-	github.com/benthosdev/benthos/v4 v4.24.0
-	github.com/go-ldap/ldap/v3 v3.4.6
-)
+require github.com/benthosdev/benthos/v4 v4.24.0
+
+require github.com/go-ldap/ldap/v3 v3.4.6 // indirect
 
 require (
 	cuelang.org/go v0.6.0 // indirect
@@ -60,6 +59,7 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect
+	github.com/ugent-library/benthos-ldap v0.0.0-20240124170103-e3ad01390e04
 	github.com/urfave/cli/v2 v2.25.7 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
