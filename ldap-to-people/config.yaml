@@ -1,0 +1,23 @@
+input:
+  label: ""
+  ldap:
+    url: "${LDAP_URL}"
+    username: "${LDAP_USERNAME}"
+    password: "${LDAP_PASSWORD}"
+    base: "ou=people,dc=ugent,dc=be"
+    filter: "(|(objectclass=ugentEmployee)(objectclass=uzEmployee)(objectclass=ugentFormerEmployee)(objectclass=ugentSenior)(objectclass=ugentStudent)(objectclass=ugentUCTStudent)(objectclass=ugentExCoStudent)(objectclass=ugentFormerStudent)(ugentextcategorycode=alum))"
+    attributes:
+      - "objectClass"
+      - "uid"
+      - "ugentPreferredSn"
+      - "ugentPreferredGivenName"
+      - "ugentID"
+      - "ugentHistoricIDs"
+      - "ugentBirthDate"
+      - "mail"
+      - "ugentBarcode"
+      - "ugentJobCategory"
+      - "ugentAddressingTitle"
+      - "displayName"
+      - "departmentNumber"
+      - "ugentFaculty"
