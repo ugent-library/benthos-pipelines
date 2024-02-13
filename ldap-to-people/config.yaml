@@ -25,78 +25,87 @@ input:
 pipeline:
   processors:
     - bloblang: |
-        root.active = true
+        root.person = {
+          "active": true,
+          "identifiers": [],
+          "attributes": []
+        }
 
-        root.identifiers = []
-        root.attributes = []
-
-        root.name = if this.exists("displayName") {
+        root.person.name = if this.exists("displayName") {
           this.displayName.0
         }
-        root.givenName = if this.exists("ugentPreferredGivenName") {
+        root.person.givenName = if this.exists("ugentPreferredGivenName") {
           this.ugentPreferredGivenName.0
         }
-        root.familyName = if this.exists("ugentPreferredSn") {
+        root.person.familyName = if this.exists("ugentPreferredSn") {
           this.ugentPreferredSn.0
         }
-        root.honorificPrefix = if this.exists("ugentAddressingTitle") {
+        root.person.honorificPrefix = if this.exists("ugentAddressingTitle") {
           this.ugentAddressingTitle.0
         }
-        root.email = if this.exists("mail") {
+        root.person.email = if this.exists("mail") {
           this.mail.0
         }
-        root.username = if this.exists("uid") {
+        root.person.username = if this.exists("uid") {
           this.uid.0
         }
 
-        root.identifiers = root.identifiers.merge(this.ugentID.map_each(val -> {
+        root.person.identifiers = root.person.identifiers.merge(this.ugentID.map_each(val -> {
             "type": "ugentID",
             "value": val
         }))
-        root.identifiers = if this.exists("ugentHistoricIDs") {
-          root.identifiers.merge(this.ugentHistoricIDs.map_each(val -> {
+        root.person.identifiers = if this.exists("ugentHistoricIDs") {
+          root.person.identifiers.merge(this.ugentHistoricIDs.map_each(val -> {
             "type": "ugentHistoricID",
             "value": val
           }))
         }
 
-        root.attributes = if this.exists("ugentBarcode") {
-          root.attributes.merge(this.ugentBarcode.map_each(val -> {
+        root.person.attributes = if this.exists("ugentBarcode") {
+          root.person.attributes.merge(this.ugentBarcode.map_each(val -> {
             "scope": "ldap",
             "key": "ugentBarcode",
             "value": val
           }))
         }
-        root.attributes = if this.exists("ugentBirthDate") {
-          root.attributes.append({
+        root.person.attributes = if this.exists("ugentBirthDate") {
+          root.person.attributes.append({
             "scope": "ldap",
             "key": "birthDate",
             "value": this.ugentBirthDate.0
           })
         }
-        root.attributes = root.attributes.merge(this.objectClass.map_each(val -> {
+        root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
             "scope": "ldap",
             "key": "objectClass",
             "value": val
         }))
-        root.attributes = if this.exists("ugentFaculty") {
-          root.attributes.merge(this.ugentFaculty.map_each(val -> {
+        root.person.attributes = if this.exists("ugentFaculty") {
+          root.person.attributes.merge(this.ugentFaculty.map_each(val -> {
             "scope": "ldap",
             "key": "ugentOrganizationID",
             "value": val
           }))
         }
-        root.attributes = if this.exists("departmentNumber") {
-          root.attributes.merge(this.departmentNumber.map_each(val -> {
+        root.person.attributes = if this.exists("departmentNumber") {
+          root.person.attributes.merge(this.departmentNumber.map_each(val -> {
             "scope": "ldap",
             "key": "ugentOrganizationID",
             "value": val
           }))
         }
-        root.attributes = if this.exists("ugentJobCategory") {
-          root.attributes.merge(this.ugentJobCategory.map_each(val -> {
+        root.person.attributes = if this.exists("ugentJobCategory") {
+          root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
             "scope": "ldap",
             "key": "ugentJobCategory",
             "value": val
           }))
         }
+
+output:
+  http_client:
+    url: ${PEOPLE_API_URL}/add-person
+    verb: POST
+    headers:
+      Content-Type: application/json
+      X-API-Key: ${PEOPLE_API_KEY}
