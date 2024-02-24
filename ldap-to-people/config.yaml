@@ -26,7 +26,7 @@ pipeline:
   processors:
     - bloblang: |
         root.person = {
-          "active": true,
+          # "active": true,
           "identifiers": [],
           "attributes": []
         }
@@ -46,17 +46,17 @@ pipeline:
         root.person.email = if this.exists("mail") {
           this.mail.0
         }
-        root.person.username = if this.exists("uid") {
-          this.uid.0
-        }
+        # root.person.username = if this.exists("uid") {
+        #   this.uid.0
+        # }
 
         root.person.identifiers = root.person.identifiers.merge(this.ugentID.map_each(val -> {
-            "type": "ugentID",
+            "kind": "ugentID",
             "value": val
         }))
         root.person.identifiers = if this.exists("ugentHistoricIDs") {
           root.person.identifiers.merge(this.ugentHistoricIDs.map_each(val -> {
-            "type": "ugentHistoricID",
+            "kind": "ugentHistoricID",
             "value": val
           }))
         }
