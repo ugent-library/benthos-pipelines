@@ -1,0 +1,111 @@
+input:
+  label: ""
+  ldap:
+    url: "${LDAP_URL}"
+    username: "${LDAP_USERNAME}"
+    password: "${LDAP_PASSWORD}"
+    base: "ou=people,dc=ugent,dc=be"
+    filter: "(|(objectclass=ugentEmployee)(objectclass=uzEmployee)(objectclass=ugentFormerEmployee)(objectclass=ugentSenior)(objectclass=ugentStudent)(objectclass=ugentUCTStudent)(objectclass=ugentExCoStudent)(objectclass=ugentFormerStudent)(ugentextcategorycode=alum))"
+    attributes:
+      - "objectClass"
+      - "uid"
+      - "ugentPreferredSn"
+      - "ugentPreferredGivenName"
+      - "ugentID"
+      - "ugentHistoricIDs"
+      - "ugentBirthDate"
+      - "mail"
+      - "ugentBarcode"
+      - "ugentJobCategory"
+      - "ugentAddressingTitle"
+      - "displayName"
+      - "departmentNumber"
+      - "ugentFaculty"
+
+pipeline:
+  processors:
+    - bloblang: |
+        root.person = {
+          # "active": true,
+          "identifiers": [],
+          "attributes": []
+        }
+
+        root.person.name = if this.exists("displayName") {
+          this.displayName.0
+        }
+        root.person.givenName = if this.exists("ugentPreferredGivenName") {
+          this.ugentPreferredGivenName.0
+        }
+        root.person.familyName = if this.exists("ugentPreferredSn") {
+          this.ugentPreferredSn.0
+        }
+        root.person.honorificPrefix = if this.exists("ugentAddressingTitle") {
+          this.ugentAddressingTitle.0
+        }
+        root.person.email = if this.exists("mail") {
+          this.mail.0
+        }
+        # root.person.username = if this.exists("uid") {
+        #   this.uid.0
+        # }
+
+        root.person.identifiers = root.person.identifiers.merge(this.ugentID.map_each(val -> {
+            "kind": "ugentID",
+            "value": val
+        }))
+        root.person.identifiers = if this.exists("ugentHistoricIDs") {
+          root.person.identifiers.merge(this.ugentHistoricIDs.map_each(val -> {
+            "kind": "ugentHistoricID",
+            "value": val
+          }))
+        }
+
+        root.person.attributes = if this.exists("ugentBarcode") {
+          root.person.attributes.merge(this.ugentBarcode.map_each(val -> {
+            "scope": "ldap",
+            "key": "ugentBarcode",
+            "value": val
+          }))
+        }
+        root.person.attributes = if this.exists("ugentBirthDate") {
+          root.person.attributes.append({
+            "scope": "ldap",
+            "key": "birthDate",
+            "value": this.ugentBirthDate.0
+          })
+        }
+        root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
+            "scope": "ldap",
+            "key": "objectClass",
+            "value": val
+        }))
+        root.person.attributes = if this.exists("ugentFaculty") {
+          root.person.attributes.merge(this.ugentFaculty.map_each(val -> {
+            "scope": "ldap",
+            "key": "ugentOrganizationID",
+            "value": val
+          }))
+        }
+        root.person.attributes = if this.exists("departmentNumber") {
+          root.person.attributes.merge(this.departmentNumber.map_each(val -> {
+            "scope": "ldap",
+            "key": "ugentOrganizationID",
+            "value": val
+          }))
+        }
+        root.person.attributes = if this.exists("ugentJobCategory") {
+          root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
+            "scope": "ldap",
+            "key": "ugentJobCategory",
+            "value": val
+          }))
+        }
+
+output:
+  http_client:
+    url: ${BIBLIO_BACKOFFICE_API_URL}/add-person
+    verb: POST
+    headers:
+      Content-Type: application/json
+      X-API-Key: ${BIBLIO_BACKOFFICE_API_KEY}
