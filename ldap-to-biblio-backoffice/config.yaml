@@ -104,8 +104,8 @@ pipeline:
 
 output:
   http_client:
-    url: ${PEOPLE_API_URL}/add-person
+    url: ${BIBLIO_BACKOFFICE_API_URL}/add-person
     verb: POST
     headers:
       Content-Type: application/json
-      X-API-Key: ${PEOPLE_API_KEY}
+      X-API-Key: ${BIBLIO_BACKOFFICE_API_KEY}
