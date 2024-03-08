@@ -31,8 +31,7 @@ pipeline:
         root.person = {
           "active": true,
           "identifiers": [],
-          "affiliations": [],
-          # "attributes": []
+          "affiliations": []
         }
 
         root.person.name = if this.exists("displayName") {
@@ -79,18 +78,23 @@ pipeline:
             }
           }))
         }
-        # root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
-        #     "scope": "ldap",
-        #     "key": "objectClass",
-        #     "value": val
-        # }))
-        # root.person.attributes = if this.exists("ugentJobCategory") {
-        #   root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
-        #     "scope": "ldap",
-        #     "key": "ugentJobCategory",
-        #     "value": val
-        #   }))
-        # }
+        root.person.affiliations = if root.person.affiliations.length == 0 && this.exists("objectClass") && 
+                                      this.objectClass.contains("ugentFormerEmployee") {
+          root.person.affiliations.merge({
+            "organizationIdentifier": {
+              "kind": "biblio",
+              "value": "UGent"
+            }
+          })
+        }
+        root.person.affiliations = if this.exists("objectClass") && this.objectClass.contains("uzEmployee") {
+          root.person.affiliations.merge({
+            "organizationIdentifier": {
+              "kind": "biblio",
+              "value": "UZGent"
+            }
+          })
+        }
 
 output:
   http_client:
