@@ -1,3 +1,6 @@
+http:
+  enabled: false
+
 input:
   label: ""
   ldap:
@@ -26,9 +29,10 @@ pipeline:
   processors:
     - bloblang: |
         root.person = {
-          # "active": true,
+          "active": true,
           "identifiers": [],
-          "attributes": []
+          "affiliations": [],
+          # "attributes": []
         }
 
         root.person.name = if this.exists("displayName") {
@@ -46,10 +50,9 @@ pipeline:
         root.person.email = if this.exists("mail") {
           this.mail.0
         }
-        # root.person.username = if this.exists("uid") {
-        #   this.uid.0
-        # }
-
+        root.person.username = if this.exists("uid") {
+          this.uid.0
+        }
         root.person.identifiers = root.person.identifiers.merge(this.ugentID.map_each(val -> {
             "kind": "ugentID",
             "value": val
@@ -60,47 +63,34 @@ pipeline:
             "value": val
           }))
         }
-
-        root.person.attributes = if this.exists("ugentBarcode") {
-          root.person.attributes.merge(this.ugentBarcode.map_each(val -> {
-            "scope": "ldap",
-            "key": "ugentBarcode",
-            "value": val
+        root.person.affiliations = if this.exists("ugentFaculty") {
+          root.person.affiliations.merge(this.ugentFaculty.map_each(val -> {
+            "organizationIdentifier": {
+              "kind": "biblio",
+              "value": val
+            }
           }))
         }
-        root.person.attributes = if this.exists("ugentBirthDate") {
-          root.person.attributes.append({
-            "scope": "ldap",
-            "key": "birthDate",
-            "value": this.ugentBirthDate.0
-          })
-        }
-        root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
-            "scope": "ldap",
-            "key": "objectClass",
-            "value": val
-        }))
-        root.person.attributes = if this.exists("ugentFaculty") {
-          root.person.attributes.merge(this.ugentFaculty.map_each(val -> {
-            "scope": "ldap",
-            "key": "ugentOrganizationID",
-            "value": val
+        root.person.affiliations = if this.exists("departmentNumber") {
+          root.person.affiliations.merge(this.departmentNumber.map_each(val -> {
+            "organizationIdentifier": {
+              "kind": "biblio",
+              "value": val
+            }
           }))
         }
-        root.person.attributes = if this.exists("departmentNumber") {
-          root.person.attributes.merge(this.departmentNumber.map_each(val -> {
-            "scope": "ldap",
-            "key": "ugentOrganizationID",
-            "value": val
-          }))
-        }
-        root.person.attributes = if this.exists("ugentJobCategory") {
-          root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
-            "scope": "ldap",
-            "key": "ugentJobCategory",
-            "value": val
-          }))
-        }
+        # root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
+        #     "scope": "ldap",
+        #     "key": "objectClass",
+        #     "value": val
+        # }))
+        # root.person.attributes = if this.exists("ugentJobCategory") {
+        #   root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
+        #     "scope": "ldap",
+        #     "key": "ugentJobCategory",
+        #     "value": val
+        #   }))
+        # }
 
 output:
   http_client:
