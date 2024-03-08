@@ -79,18 +79,18 @@ pipeline:
             }
           }))
         }
-        root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
-            "scope": "ldap",
-            "key": "objectClass",
-            "value": val
-        }))
-        root.person.attributes = if this.exists("ugentJobCategory") {
-          root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
-            "scope": "ldap",
-            "key": "ugentJobCategory",
-            "value": val
-          }))
-        }
+        # root.person.attributes = root.person.attributes.merge(this.objectClass.map_each(val -> {
+        #     "scope": "ldap",
+        #     "key": "objectClass",
+        #     "value": val
+        # }))
+        # root.person.attributes = if this.exists("ugentJobCategory") {
+        #   root.person.attributes.merge(this.ugentJobCategory.map_each(val -> {
+        #     "scope": "ldap",
+        #     "key": "ugentJobCategory",
+        #     "value": val
+        #   }))
+        # }
 
 output:
   http_client:
