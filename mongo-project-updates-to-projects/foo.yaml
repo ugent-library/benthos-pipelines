@@ -1,3 +1,6 @@
+http:
+  enabled: false
+
 # Common config fields, showing default values
 input:
   label: ""

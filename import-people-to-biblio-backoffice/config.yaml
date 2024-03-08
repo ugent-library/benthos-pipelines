@@ -1,10 +1,17 @@
+http:
+  enabled: false
+
 input:
   type: stdin
 
 output:
-  http_client:
-    url: ${BIBLIO_BACKOFFICE_API_URL}/import-person
-    verb: POST
-    headers:
-      Content-Type: application/json
-      X-API-Key: ${BIBLIO_BACKOFFICE_API_KEY}
+  drop_on:
+    error: true
+    output:
+      http_client:
+        url: ${BIBLIO_BACKOFFICE_API_URL}/import-person
+        verb: POST
+        headers:
+          Content-Type: application/json
+          X-API-Key: ${BIBLIO_BACKOFFICE_API_KEY}
+        drop_on: [409]
