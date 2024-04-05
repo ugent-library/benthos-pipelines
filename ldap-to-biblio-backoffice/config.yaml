@@ -47,7 +47,7 @@ pipeline:
           this.ugentAddressingTitle.0
         }
         root.person.email = if this.exists("mail") {
-          this.mail.0
+          this.mail.0.lowercase()
         }
         root.person.username = if this.exists("uid") {
           this.uid.0
