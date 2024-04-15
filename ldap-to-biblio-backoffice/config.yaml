@@ -14,8 +14,10 @@ input:
       - "uid"
       - "ugentPreferredSn"
       - "ugentPreferredGivenName"
+      - "ugentPersonID"
       - "ugentID"
       - "ugentHistoricIDs"
+      - "ugentOrcid"
       - "ugentBirthDate"
       - "mail"
       - "ugentBarcode"
@@ -56,8 +58,17 @@ pipeline:
             "kind": "ugentID",
             "value": val
         }))
-        root.person.identifiers = if this.exists("ugentHistoricIDs") {
-          root.person.identifiers.merge(this.ugentHistoricIDs.map_each(val -> {
+        root.person.identifiers = root.person.identifiers.merge(this.ugentPersonID.map_each(val -> {
+            "kind": "ugentPersonID",
+            "value": val
+        }))
+        root.person.identifiers = root.person.identifiers.merge(this.ugentOrcid.map_each(val -> {
+            "kind": "orcid",
+            "value": val.trim_prefix("https://orcid.org/")
+        }))
+        root.person.attributes = if this.exists("ugentHistoricIDs") {
+          root.person.attributes.merge(this.ugentHistoricIDs.map_each(val -> {
+            "scope": "ugent",
             "kind": "ugentHistoricID",
             "value": val
           }))
