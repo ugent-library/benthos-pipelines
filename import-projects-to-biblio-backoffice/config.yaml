@@ -1,0 +1,20 @@
+http:
+  enabled: false
+
+input:
+  stdin:
+    scanner:
+      lines:
+        max_buffer_size: 524288
+
+output:
+  drop_on:
+    error: true
+    output:
+      http_client:
+        url: ${BIBLIO_BACKOFFICE_API_URL}/import-project
+        verb: POST
+        headers:
+          Content-Type: application/json
+          X-API-Key: ${BIBLIO_BACKOFFICE_API_KEY}
+        drop_on: [409]

@@ -1,3 +1,6 @@
+http:
+  enabled: false
+
 input:
   label: ""
   mongodb:
@@ -42,6 +45,12 @@ pipeline:
             "propertyID": "IWETO",
             "value": this.iweto_id
           })
+        } else {
+          root.identifier.append({
+            "type": "PropertyValue",
+            "propertyID": "IWETO",
+            "value": this._id
+          })
         }
 
         root.identifier = if this.exists("gismo_id") {
@@ -59,6 +68,21 @@ pipeline:
             "value": this.eu_id
           })
         }
+
+        let ugentID = if this.exists("ugent_id") {
+          if this.ugent_id.length() > 0 { this.ugent_id.map_each(t -> {
+                "type": "PropertyValue",
+                "value": t,
+                "propertyID": "UGENT"
+            })
+          } else {
+            []
+          }
+        } else {
+          []
+        }
+
+        root.identifier = root.identifier.merge($ugentID)
 
         root.hasAcronym = []
         root.hasAcronym = if this.exists("eu_acronym") {
