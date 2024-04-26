@@ -33,6 +33,7 @@ pipeline:
         root.person = {
           "active": true,
           "identifiers": [],
+          "attributes": [],
           "affiliations": []
         }
 
@@ -58,18 +59,22 @@ pipeline:
             "kind": "ugentID",
             "value": val
         }))
-        root.person.identifiers = root.person.identifiers.merge(this.ugentPersonID.map_each(val -> {
-            "kind": "ugentPersonID",
-            "value": val
-        }))
-        root.person.identifiers = root.person.identifiers.merge(this.ugentOrcid.map_each(val -> {
-            "kind": "orcid",
-            "value": val.trim_prefix("https://orcid.org/")
-        }))
+        root.person.identifiers = if this.exists("ugentPersonID") {
+          root.person.identifiers.merge(this.ugentPersonID.map_each(val -> {
+              "kind": "ugentPersonID",
+              "value": val
+          }))
+        }
+        root.person.identifiers = if this.exists("ugentOrcid") {
+          root.person.identifiers.merge(this.ugentOrcid.map_each(val -> {
+              "kind": "orcid",
+              "value": val.trim_prefix("https://orcid.org/")
+          }))
+        }
         root.person.attributes = if this.exists("ugentHistoricIDs") {
           root.person.attributes.merge(this.ugentHistoricIDs.map_each(val -> {
             "scope": "ugent",
-            "kind": "ugentHistoricID",
+            "key": "ugentHistoricID",
             "value": val
           }))
         }
