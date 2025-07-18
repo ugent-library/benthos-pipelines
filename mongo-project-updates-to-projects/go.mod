@@ -1,6 +1,7 @@
 module github.com/ugent-library/benthos-pipelines/mongo-project-updates-to-projects
 
-go 1.21.1
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
@@ -26,7 +27,6 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
@@ -77,11 +77,10 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/oauth2 v0.12.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
